@@ -28,7 +28,7 @@ function saveLog(name) {
 	// get the data-time and make it into filename
 	var datetime = new Date();
 	var timeStamp = datetime.toLocaleDateString().replace(/\//g, "-")
-			+ "(" +   datetime.getHours() + "-" + datetime.getMinutes() + ")";
+			+ "(" +   datetime.getHours() + ":" + datetime.getMinutes() + ")";
 	// the string following by "!log " is the Nickname
 	logName = name.replace(/ /g, "_") + "." + timeStamp + ".txt";
 	// console.log("log file name = " + logName);
@@ -37,7 +37,7 @@ function saveLog(name) {
 
 	$.ajax({
 		method: "POST",
-		url: "http://localhost:9090/saveChatLog/" + logName,
+		url: "http://localhost:8080/saveChatLog/" + logName,
 		data: {data: str},
 		// dataType: "String",
 		// processData: false,
@@ -121,7 +121,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		// else if (request.chatroom == "skype")
 		//	{ voovChat = false; adultChat = false; }
 
-		console.log("Script2: switched to: " + request.chatroom2);
+		// console.log("Script2: switched to: " + request.chatroom2);
 		return true;
 		}
 
@@ -160,6 +160,18 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 		if (str.indexOf("!his") > -1) {
 			his();
+			return true;
+		}
+
+		if (str.indexOf("!reset") > -1) {
+			// Perhaps unload own script?
+			var uninstalling = browser.management.uninstallSelf({
+				showConfirmDialog: true,
+				dialogMessage: "self-uninstall"
+				});
+			uninstalling.then(null, function(err) {
+				console.log("Uninstall failed\n");
+			});
 			return true;
 		}
 
@@ -209,7 +221,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 			// For Adult chat, need to record own messages
 			// because own messages appear as broken pieces on their page
-			// chat_history[chat_history.length] = str + "\n";
+			chat_history[chat_history.length] = str + "\n";
 			}
 
 		// This one is the new Dream Chat:
@@ -277,13 +289,14 @@ var lastVoovLine2 = "";
 var lastAdultIndex = 1;
 var lastIp131Index = 1;
 var lastIp203Index = 1;
-var lastHkloveIndex = 1;
+var lastHk2loveIndex = 1;
+var lastHk2loveLine = "";
 var lastIp4Index = 1;
 
 // Check activity every second
 // If there's activity, message Background Script to play a sound
 setInterval( function() {
-	// timeStamp = Date().slice(16,24);
+	timeStamp = Date().slice(16,24);
 	
 	/*
 	if (document.URL.indexOf("voovchat\/") >= 0) {
@@ -324,12 +337,13 @@ setInterval( function() {
 				}
 			}
 			if (alert == true)
-				chrome.runtime.sendMessage({alert: "voov"});
+				browser.runtime.sendMessage({alert: "voov"});
 		}
 		lastVoovLine = lineNum;
 	}
 	*/
 
+	/*
 	if (document.URL.indexOf("hklovechat.com\/") >= 0) {
 		chatWin = document.getElementsByName("messages")[0].contentDocument.childNodes[1];
 		chatWin2 = chatWin.childNodes[2].childNodes[1].getElementsByClassName("divMessages").divMessages;
@@ -362,7 +376,7 @@ setInterval( function() {
 			}
 		}
 		if (alert == true)
-			chrome.runtime.sendMessage({alert: "voov2"});
+			browser.runtime.sendMessage({alert: "voov2"});
 		// Find the last line that's non-empty
 		lastVoovLine2 = "top line";
 		for (i = lastIndex; i > 0; i--) {
@@ -373,7 +387,79 @@ setInterval( function() {
 			}
 		}
 	}
+	*/
 
+	// ******** HK 2 Love **************
+	if (document.URL.indexOf("hk2love.com\/cgi-bin") >= 0) {
+		// this gives us an HTML element of the public chat area:
+		html = document.getElementsByName("a2")[0].contentDocument;
+		// this is the element containing the rows:
+		chatWin1 = html.childNodes[0].childNodes[1];
+		// get down to the last page of messages:
+		chatWin = chatWin1.childNodes[chatWin1.childElementCount];
+		if (chatWin !== undefined) {
+			// number of lines in chat win:
+			lastIndex = chatWin.childElementCount - 1;
+			if ((chatWin != null) && (lastIndex > lastHk2loveIndex)) {
+				var alert = false;
+				for (i = lastIndex; i > 0; i--) {
+					stuff = chatWin.children[i].innerText;
+					if (stuff == lastHk2loveLine)
+						break;
+					if (stuff.indexOf("只對『PT141』") > -1 ||
+						// stuff.indexOf("只對『半機器人1號』") > -1 ||
+						// stuff.indexOf(">>『半機器人1號』") > -1 ||
+						stuff.indexOf(">>『PT141』") > -1) {
+						// sound alert
+						alert = true;
+						chat_history[chat_history.length] = stuff + "\n";
+						// console.log(timeStamp + stuff);
+					}
+				}
+				if (alert == true)
+					browser.runtime.sendMessage({alert: "hk2love"});
+			}
+			lastHk2loveIndex = lastIndex;
+			// Find the last line that's non-empty
+			lastHk2loveLine = "top line";
+			for (i = lastIndex; i > 0; i--) {
+				stuff = chatWin.children[i].innerText;
+				if (stuff != "") {
+					lastHk2loveLine = stuff;
+					break;
+				}
+			}
+		}
+	}
+
+	// ******** 寻梦园 情色聊天室 **************
+	if (document.URL.indexOf("ip131") >= 0) {
+		// this gives us an HTML element of the public chat area:
+		html = document.getElementById("marow").childNodes[3].childNodes[3].contentDocument.childNodes[0];
+		// this is the <div> element containing the rows:
+		chatWin = html.children[1].children[6];
+		// number of lines in chat win:
+		lastIndex = chatWin.childElementCount - 1;
+		if ((chatWin != null) && (lastIndex > lastIp131Index)) {
+			var alert = false;
+			for (i = lastIndex; i > lastIp131Index; i--) {
+				stuff = chatWin.children[i].innerText;
+				if (stuff.indexOf("對 訪客_半機械人一號") > -1 ||
+					stuff.indexOf("對 訪客_Cybernetic1") > -1) {
+					// sound alert
+					alert = true;
+					chat_history[chat_history.length] = timeStamp + ' ' + stuff + "\n";
+					// console.log(timeStamp + stuff);
+				}
+				// To-do:  On Adult page, own messages appear as broken pieces
+			}
+			if (alert == true)
+				browser.runtime.sendMessage({alert: "ip131"});
+		}
+		lastIp131Index = lastIndex;
+	}
+
+	/*
 	if (document.URL.indexOf("VIP") >= 0) {
 		// this gives us an HTML element:
 		html = document.getElementsByName("m")[0].contentDocument.childNodes[0];
@@ -394,38 +480,13 @@ setInterval( function() {
 				// To-do:  On Adult page, own messages appear as broken pieces
 			}
 			if (alert == true)
-				chrome.runtime.sendMessage({alert: "adult"});
+				browser.runtime.sendMessage({alert: "adult"});
 		}
 		lastAdultIndex = lastIndex;
 	}
+	*/
 
-	// 寻梦园 情色聊天室
-	if (document.URL.indexOf("ip131") >= 0) {
-		// this gives us an HTML element of the public chat area:
-		html = document.getElementById("marow").childNodes[3].childNodes[3].contentDocument.childNodes[0];
-		// this is the <div> element containing the rows:
-		chatWin = html.children[1].children[6];
-		// number of lines in chat win:
-		lastIndex = chatWin.childElementCount - 1;
-		if ((chatWin != null) && (lastIndex > lastIp131Index)) {
-			var alert = false;
-			for (i = lastIndex; i > lastIp131Index; i--) {
-				stuff = chatWin.children[i].innerText;
-				if (stuff.indexOf("對 訪客_半機械人一號") > -1 ||
-					stuff.indexOf("對 訪客_Cybernetic1") > -1) {
-					// sound alert
-					alert = true;
-					// chat_history[chat_history.length] = stuff + "\n";
-					// console.log(timeStamp + stuff);
-				}
-				// To-do:  On Adult page, own messages appear as broken pieces
-			}
-			if (alert == true)
-				chrome.runtime.sendMessage({alert: "ip131"});
-		}
-		lastIp131Index = lastIndex;
-	}
-
+	/*
 	if (document.URL.indexOf("ip203") >= 0) {
 		// this gives us an HTML element of the public chat area:
 		html = document.getElementById("marow").childNodes[3].childNodes[3].contentDocument.childNodes[0];
@@ -447,7 +508,7 @@ setInterval( function() {
 				// To-do:  On Adult page, own messages appear as broken pieces
 			}
 			if (alert == true)
-				chrome.runtime.sendMessage({alert: "ip203"});
+				browser.runtime.sendMessage({alert: "ip203"});
 		}
 		lastIp203Index = lastIndex;
 	}
@@ -473,45 +534,13 @@ setInterval( function() {
 				// To-do:  On Adult page, own messages appear as broken pieces
 			}
 			if (alert == true)
-				chrome.runtime.sendMessage({alert: "ip4"});
+				browser.runtime.sendMessage({alert: "ip4"});
 		}
 		lastIp4Index = lastIndex;
 	}
-
-	if (document.URL.indexOf("hk2love.com\/cgi-bin") >= 0) {
-		// this gives us an HTML element of the public chat area:
-		html = document.getElementsByName("a2")[0].contentDocument;
-		// this is the element containing the rows:
-		chatWin1 = html.childNodes[0].childNodes[1];
-		// get down to the last page of messages:
-		chatWin = chatWin1.childNodes[chatWin1.childElementCount];
-		if (chatWin !== undefined) {
-			// number of lines in chat win:
-			lastIndex = chatWin.childElementCount - 1;
-			if ((chatWin != null) && (lastIndex > lastHkloveIndex)) {
-				var alert = false;
-				for (i = lastIndex; i > lastHkloveIndex; i--) {
-					stuff = chatWin.children[i].innerText;
-					if (stuff.indexOf("只對『Metazoan1』") > -1 ||
-						stuff.indexOf("只對『半機器人1號』") > -1 ||
-						stuff.indexOf(">>『半機器人1號』") > -1 ||
-						stuff.indexOf(">>『Metazoan1』") > -1) {
-						// sound alert
-						alert = true;
-						chat_history[chat_history.length] = stuff + "\n";
-						// console.log(timeStamp + stuff);
-					}
-					// To-do:  On Adult page, own messages appear as broken pieces
-				}
-				if (alert == true)
-					chrome.runtime.sendMessage({alert: "hk2love"});
-			}
-			lastHkloveIndex = lastIndex;
-		}
-	}
+	*/
 },
-20000);
-*/
+3000);
 
 // Execute only once, to click 'private chat' automatically
 setTimeout(function() {
@@ -524,7 +553,7 @@ setTimeout(function() {
 	}
 
 	if (document.URL.indexOf("hk2love.com\/index.php?location=chat") >= 0) {
-		document.getElementsByName("id")[0].value = "Metazoan1";
+		document.getElementsByName("id")[0].value = "Ardipithecus01";
 		document.getElementsByName("pw")[0].value = "lowsecurity";
 		document.getElementsByName("auto_login")[0].checked = true;
 		// button.click();
@@ -548,12 +577,12 @@ setTimeout(function() {
 		butt = html.childNodes[0].childNodes[2].childNodes[0].childNodes[3].childNodes[1];
 	}
 },
-3000);
+2000);
 
 // This seems to be run only once, as each "Chatroom" page is loaded.
 console.log("Content script #2 (25 March 2017) loaded....");
 
-/*
+/* *******************************************************************************
 
 // Older function (deprecated)
 function saveLog2(name) {

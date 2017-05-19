@@ -22,13 +22,13 @@ querying.then((tabs) => {
 	voov2Id = tab.id;
 	}});
 
-querying = browser.tabs.query({url: "http://60.199.209.71/VIP*/index.phtml"});
+querying = browser.tabs.query({url: "http://60.199.209.71/VIP*\/index.phtml"});
 querying.then((tabs) => {
 	for (var tab of tabs) {
 	adultId = tab.id;
 	}});
 
-querying = browser.tabs.query({url: "http://60.199.209.72/VIP*/index.phtml"});
+querying = browser.tabs.query({url: "http://60.199.209.72/VIP*\/index.phtml"});
 querying.then((tabs) => {
 	for (var tab of tabs) {
 	adultId = tab.id;
@@ -58,16 +58,23 @@ querying.then((tabs) => {
 	hk2loveId = tab.id;
 	}});
 
+// Listen to Node.js server
 var evtSource = new EventSource("http://localhost:8080/stream");
-evtSource.addEventListener("message", function(event) {
-	console.log("Event: " + event.data);
-}, false);
+
+evtSource.onmessage = function(e) {
+	// Directly output to chatroom
+	if (hk2loveId)
+		browser.tabs.sendMessage(hk2loveId, {sendtext: e.data});
+	if (ip131Id)
+		browser.tabs.sendMessage(ip131Id, {sendtext: e.data});
+	console.log("Event: " + e.data);
+};
 
 // Set up message listener
 browser.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
-	console.log(sender.tab ?	"from a content script:" + sender.tab.url :
-		"from the extension");
+	// console.log(sender.tab ?	"from a content script:" + sender.tab.url :
+	//	"from the extension");
 
 	// Request to change target chatroom
 	// The request is sent from contentscript2:mouseover event
@@ -87,23 +94,23 @@ browser.runtime.onMessage.addListener(
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				voovId = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(voovId, {chatroom2: request.chatroom});
 				}},
 			function() {voovId = null;});
 
-		querying = browser.tabs.query({url: "http://60.199.209.71/VIP*/index.phtml"});
+		querying = browser.tabs.query({url: "http://60.199.209.71/VIP*\/index.phtml"});
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				adultId = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(adultId, {chatroom2: request.chatroom});
 				}},
 			function() {adultId = null;});
 
-		querying = browser.tabs.query({url: "http://60.199.209.72/VIP*/index.phtml"});
+		querying = browser.tabs.query({url: "http://60.199.209.72/VIP*\/index.phtml"});
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				adultId = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(adultId, {chatroom2: request.chatroom});
 				}},
 			function() {adultId = null;});
 
@@ -111,7 +118,7 @@ browser.runtime.onMessage.addListener(
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				ip131Id = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(ip131Id, {chatroom2: request.chatroom});
 				}},
 			function() {ip131Id = null;});
 
@@ -119,7 +126,7 @@ browser.runtime.onMessage.addListener(
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				ip203Id = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(ip203Id, {chatroom2: request.chatroom});
 				}},
 			function() {ip203Id = null;});
 
@@ -127,7 +134,7 @@ browser.runtime.onMessage.addListener(
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				ip4Id = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(ip4Id, {chatroom2: request.chatroom});
 				}},
 			function() {ip4Id = null;});
 
@@ -135,11 +142,11 @@ browser.runtime.onMessage.addListener(
 		querying.then((tabs) => {
 			for (var tab of tabs) {
 				hk2loveId = tab.id;
-				browser.tabs.sendMessage(voov2Id, {chatroom2: request.chatroom});
+				browser.tabs.sendMessage(hk2loveId, {chatroom2: request.chatroom});
 				}},
 			function() {hk2loveId = null;});
 
-		console.log("trying to switch to: ", request.chatroom)
+		// console.log("trying to switch to: ", request.chatroom)
 		}
 
 	// Request to send text to target chatroom
@@ -163,7 +170,7 @@ browser.runtime.onMessage.addListener(
 		if (hk2loveId)
 			browser.tabs.sendMessage(hk2loveId, {sendtext: request.sendtext});
 
-		console.log("Sent text to content script 2: ", ip131Id);
+		// console.log("Sent text to content script 2: ", ip131Id);
 		}
 
 	// Request to copy to clipboard, this must be done via background page
@@ -174,7 +181,7 @@ browser.runtime.onMessage.addListener(
 		clipboardholder.value = request.clipboard;
 		clipboardholder.select();
 		document.execCommand("Copy");
-		console.log("copied to clipboard: " + request.clipboard);
+		// console.log("copied to clipboard: " + request.clipboard);
 		}
 
 	// Request to play an alert sound (must be done thru background page)
@@ -257,22 +264,38 @@ function onClickContext2(info, tab) {
     });
 }
 
+function onClickContext3(info, tab) {
+    browser.tabs.query({
+        "active": true,
+        "currentWindow": true
+    }, function (tabs) {
+		ip131Id = tabs[0].id;
+		console.log("Set ip131 ID = " + ip131Id);
+        // browser.tabs.sendMessage(tabs[0].id, { sendtext: "!log " + fname });
+    });
+}
+
+function onClickContext4(info, tab) {
+
+	evtSource = new EventSource("http://localhost:8080/stream");
+
+	evtSource.onmessage = function(e) {
+		// Directly output to chatroom
+		if (hk2loveId)
+			browser.tabs.sendMessage(hk2loveId, {sendtext: e.data});
+		if (ip131Id)
+			browser.tabs.sendMessage(ip131Id, {sendtext: e.data});
+		// console.log("Event: " + e.data);
+		};
+}
+
 // Create one test item for each context type.
-var contexts = ["page" //, "selection", "link", "editable", "image", "video", "audio"
+var contexts = ["page", "image", "editable" //, "selection", "link", "video", "audio"
 	];
 
 for (var i = 0; i < contexts.length; i++) {
     var context = contexts[i];
 
-    var title2 = "Clear history";
-    var id2 = chrome.contextMenus.create({
-        "title": title2,
-        "contexts": [context],
-        "onclick": onClickContext2
-		});
-
-	// console.log("'" + context + "' item:" + id);
-	
     var title = "Save log";
     var id = chrome.contextMenus.create({
         "title": title,
@@ -280,7 +303,28 @@ for (var i = 0; i < contexts.length; i++) {
         "onclick": onClickContext
 		});
     // console.log("'" + context + "' item:" + id);
-    
+
+    var title2 = "Clear history";
+    var id2 = chrome.contextMenus.create({
+        "title": title2,
+        "contexts": [context],
+        "onclick": onClickContext2
+		});
+	// console.log("'" + context + "' item:" + id);
+
+    var title3 = "Set tab ID";
+    var id = chrome.contextMenus.create({
+        "title": title3,
+        "contexts": [context],
+        "onclick": onClickContext3
+		});
+		
+    var title4 = "Restart event stream";
+    var id = chrome.contextMenus.create({
+        "title": title4,
+        "contexts": [context],
+        "onclick": onClickContext4
+		});
 	}
 
 // var console2 = document.getElementById("console-msgs");
