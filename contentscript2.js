@@ -4,7 +4,7 @@
 // each other.
 
 // To-do:
-// *
+// * 来客发声
 
 // Which chatroom output is selected by user?
 // The selection is done on the Conceptual Keyboard page with radio buttons
@@ -14,6 +14,7 @@ var adultChat = false;
 var ip131Chat = false;
 var ip203Chat = false;
 var ip4Chat = false;
+var ip69Chat = false;		// 长直发
 var hk2loveChat = false;
 
 var logName = "log.txt";					// Name of the log file, to be filled
@@ -33,14 +34,15 @@ function saveLog(name) {
 	logName = name.replace(/ /g, "_") + "." + timeStamp + ".txt";
 	// console.log("log file name = " + logName);
 
-	var str = chat_history.join();
+	var str = chat_history.join('');
 
 	$.ajax({
 		method: "POST",
 		url: "http://localhost:8080/saveChatLog/" + logName,
-		data: {data: str},
-		// dataType: "String",
-		// processData: false,
+		contentType: "application/json; charset=utf-8",
+		// dataType: "text",	// This affects the data to be received
+		processData: false,
+		data: str,
 		success: function(resp) {
 			console.log("Successfully saved: " + logName);
 		}
@@ -51,24 +53,33 @@ function saveLog(name) {
 // Not only set the flags, but we need to broadcast to other content scripts 
 // These messages are processed by 
 document.addEventListener("mouseover", function(){
+	/*
 	if (document.URL.indexOf("hklovechat") >= 0) {
 		// console.log("switch to hk love chat (new voov)");
 		browser.runtime.sendMessage({chatroom: "voov2"});
 		ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
 		voov2Chat = true;
 	}
+	*/
 	if (document.URL.indexOf("hk2love") >= 0) {
 		// console.log("switch to hk2love (prude chat)");
 		browser.runtime.sendMessage({chatroom: "hk2love"});
 		ip131Chat = false; ip203Chat = false; hk2loveChat = true; ip4Chat = false;
-		voov2Chat = false;
+		voov2Chat = false; ip69Chat = false;
 	}
-	if (document.URL.indexOf("ip131") >= 0) {
+	if (document.URL.indexOf("ip131") >= 0) {		// 寻梦园 情色聊天室
 		// console.log("switch to ip131");
 		browser.runtime.sendMessage({chatroom: "ip131"});
 		ip131Chat = true; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
-		voov2Chat = false;
+		voov2Chat = false; ip69Chat = false;
 	}
+	if (document.URL.indexOf("ip69") >= 0) {		// 寻梦园 长直发
+		// console.log("switch to ip4");
+		browser.runtime.sendMessage({chatroom: "ip4"});
+		ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = true;
+		voov2Chat = false; ip69Chat = true;
+	}
+	/*
 	if (document.URL.indexOf("ip203") >= 0) {
 		// console.log("switch to ip203");
 		browser.runtime.sendMessage({chatroom: "ip203"});
@@ -81,6 +92,7 @@ document.addEventListener("mouseover", function(){
 		ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = true;
 		voov2Chat = false;
 	}
+	*/
 });
 
 function his() {
@@ -104,20 +116,24 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		*/
 		if (request.chatroom2 == "ip131")
 			{ ip131Chat = true; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
-				voov2Chat = false;}
+				voov2Chat = false; ip69Chat = false; }
+		else if (request.chatroom2 == "hk2love")
+			{ ip131Chat = false; ip203Chat = false; hk2loveChat = true; ip4Chat = false;
+				voov2Chat = false; ip69Chat = false; }
+		else if (request.chatroom2 == "ip69")
+			{ ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
+				voov2Chat = false; ip69Chat = true; }
+		/*
 		else if (request.chatroom2 == "ip203")
 			{ ip131Chat = false; ip203Chat = true; hk2loveChat = false; ip4Chat = false;
 				voov2Chat = false;}
 		else if (request.chatroom2 == "ip4")
 			{ ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = true;
 				voov2Chat = false;}
-		else if (request.chatroom2 == "hk2love")
-			{ ip131Chat = false; ip203Chat = false; hk2loveChat = true; ip4Chat = false;
-				voov2Chat = false;}
 		else if (request.chatroom2 == "voov2")
 			{ ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
 				voov2Chat = true;}
-
+		*/
 		// else if (request.chatroom == "skype")
 		//	{ voovChat = false; adultChat = false; }
 
@@ -141,6 +157,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 				(ip131Chat && document.URL.indexOf("ip131") >= 0) ||
 				(ip203Chat && document.URL.indexOf("ip203") >= 0) ||
 				(ip4Chat && document.URL.indexOf("ip4") >= 0) ||
+				(ip69Chat && document.URL.indexOf("ip69") >= 0) ||
 				(hk2loveChat && document.URL.indexOf("hk2love") >= 0)) {
 				
 				// the string following by "!log " is the Nickname, hence 5 chars
@@ -175,6 +192,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			return true;
 		}
 
+		/*
 		if (voov2Chat && document.URL.indexOf("hklovechat") >= 0) {
 			//**************** HK Love Chat (new Voov) ***************
 			var inputBox = document.getElementsByName("message")[0].contentDocument;
@@ -188,6 +206,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			
 			//chat_history[chat_history.length] = str + "\n";
 			}
+		*/
 
 		/*
 		if (adultChat && document.URL.indexOf("VIP") >= 0) {
@@ -224,7 +243,43 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			chat_history[chat_history.length] = str + "\n";
 			}
 
-		// This one is the new Dream Chat:
+		// This one is for: 寻梦园 长直发
+		if (ip69Chat && document.URL.indexOf("ip69") >= 0) {
+			// *********** Find Dream Garden Chatroom ***************
+			if (last_str == str)		// DreamLand does not allow to send duplicate messages
+				str = " " + str;
+
+			var inputBox = document.getElementsByName("ta")[0].contentWindow.document.getElementsByName("says_temp")[0];
+			// console.log("DOM element: " + inputBox);
+			inputBox.value = str;
+			last_str = str;
+			// and then perhaps click "enter"?
+			var sendButton = document.getElementsByName("ta")[0].contentWindow.document.querySelectorAll("input[value='送出']")[0];
+			sendButton.click();
+
+			// For Adult chat, need to record own messages
+			// because own messages appear as broken pieces on their page
+			chat_history[chat_history.length] = str + "\n";
+			}
+
+		// For HK2Love chatroom (prude chat):
+		if (hk2loveChat && document.URL.indexOf("hk2love") >= 0) {
+			if (last_str == str)		// does not allow to send duplicate messages
+				str = " " + str;
+
+			var inputBox = document.getElementsByName("c")[0].contentWindow.document.getElementsByName("says_temp")[0];
+			// console.log("DOM element: " + inputBox);
+			inputBox.value = str;
+			last_str = str;
+			// and then perhaps click "enter"?
+			var sendButton = document.getElementsByName("c")[0].contentWindow.document.querySelectorAll("input[value='送出']")[0];
+			sendButton.click();
+
+			// record own messages
+			chat_history[chat_history.length] = str + "\n";
+			}
+
+		/* This one is the new Dream Chat:
 		if (ip203Chat && document.URL.indexOf("ip203") >= 0) {
 			// *********** Find Dream Garden Chatroom ***************
 			if (last_str == str)		// DreamLand does not allow to send duplicate messages
@@ -261,24 +316,8 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			// because own messages appear as broken pieces on their page
 			chat_history[chat_history.length] = str + "\n";
 			}
+		*/
 
-		// For HK2Love chatroom (prude chat):
-		if (hk2loveChat && document.URL.indexOf("hk2love") >= 0) {
-			if (last_str == str)		// does not allow to send duplicate messages
-				str = " " + str;
-
-			var inputBox = document.getElementsByName("c")[0].contentWindow.document.getElementsByName("says_temp")[0];
-			// console.log("DOM element: " + inputBox);
-			inputBox.value = str;
-			last_str = str;
-			// and then perhaps click "enter"?
-			var sendButton = document.getElementsByName("c")[0].contentWindow.document.querySelectorAll("input[value='送出']")[0];
-			sendButton.click();
-
-			// For Adult chat, need to record own messages
-			// because own messages appear as broken pieces on their page
-			chat_history[chat_history.length] = str + "\n";
-			}
 		}
 	return true;
 	});
@@ -292,6 +331,7 @@ var lastIp203Index = 1;
 var lastHk2loveIndex = 1;
 var lastHk2loveLine = "";
 var lastIp4Index = 1;
+var lastIp69Index = 1;
 
 // Check activity every second
 // If there's activity, message Background Script to play a sound
@@ -406,10 +446,11 @@ setInterval( function() {
 					stuff = chatWin.children[i].innerText;
 					if (stuff == lastHk2loveLine)
 						break;
-					if (stuff.indexOf("只對『PT141』") > -1 ||
-						// stuff.indexOf("只對『半機器人1號』") > -1 ||
-						// stuff.indexOf(">>『半機器人1號』") > -1 ||
-						stuff.indexOf(">>『PT141』") > -1) {
+					if (// stuff.indexOf("只對『PT141』") > -1 ||
+						stuff.indexOf("只對『dead.Charlotte』") > -1 ||
+						stuff.indexOf(">>『dead.Charlotte』") > -1)
+						// stuff.indexOf(">>『PT141』") > -1)
+						{
 						// sound alert
 						alert = true;
 						chat_history[chat_history.length] = stuff + "\n";
@@ -445,6 +486,7 @@ setInterval( function() {
 			for (i = lastIndex; i > lastIp131Index; i--) {
 				stuff = chatWin.children[i].innerText;
 				if (stuff.indexOf("對 訪客_半機械人一號") > -1 ||
+					stuff.indexOf("對 訪客_Cybernetic2") > -1 ||
 					stuff.indexOf("對 訪客_Cybernetic1") > -1) {
 					// sound alert
 					alert = true;
@@ -457,6 +499,33 @@ setInterval( function() {
 				browser.runtime.sendMessage({alert: "ip131"});
 		}
 		lastIp131Index = lastIndex;
+	}
+
+	// ******** 寻梦园 长直发 **************
+	if (document.URL.indexOf("ip69") >= 0) {
+		// this gives us an HTML element of the public chat area:
+		html = document.getElementById("marow").childNodes[3].childNodes[3].contentDocument.childNodes[0];
+		// this is the <div> element containing the rows:
+		chatWin = html.children[1].children[6];
+		// number of lines in chat win:
+		lastIndex = chatWin.childElementCount - 1;
+		if ((chatWin != null) && (lastIndex > lastIp69Index)) {
+			var alert = false;
+			for (i = lastIndex; i > lastIp69Index; i--) {
+				stuff = chatWin.children[i].innerText;
+				if (stuff.indexOf("對 訪客_Cybernetic2") > -1 ||
+					stuff.indexOf("對 訪客_Cybernetic1") > -1) {
+					// sound alert
+					alert = true;
+					chat_history[chat_history.length] = timeStamp + ' ' + stuff + "\n";
+					// console.log(timeStamp + stuff);
+				}
+				// To-do:  On Adult page, own messages appear as broken pieces
+			}
+			if (alert == true)
+				browser.runtime.sendMessage({alert: "ip69"});
+		}
+		lastIp69Index = lastIndex;
 	}
 
 	/*
@@ -542,8 +611,9 @@ setInterval( function() {
 },
 3000);
 
-// Execute only once, to click 'private chat' automatically
+// ******** Execute only once, at start of page-load **********
 setTimeout(function() {
+	/* ****** What is this for???
 	if (document.URL.indexOf("hklovechat.com\/") >= 0) {
 		statusBar = document.getElementsByName("message")[0].contentDocument.childNodes[1];
 		button = statusBar.childNodes[2].childNodes[1].childNodes[22].childNodes[3].
@@ -551,19 +621,24 @@ setTimeout(function() {
 		childNodes[5].childNodes[1];
 		button.click();
 	}
+	*/
 
+	// ****** Fill in password
 	if (document.URL.indexOf("hk2love.com\/index.php?location=chat") >= 0) {
-		document.getElementsByName("id")[0].value = "Ardipithecus01";
+		document.getElementsByName("id")[0].value = "dead_Charlotte";
 		document.getElementsByName("pw")[0].value = "lowsecurity";
 		document.getElementsByName("auto_login")[0].checked = true;
 		// button.click();
 	}
+	
 
+	// Click 'private chat' automatically
 	if (document.URL.indexOf("hk2love.com\/cgi-bin") >= 0) {
 		var doc = document.getElementsByName("c")[0].contentDocument;
 		doc.getElementById("c4").checked = true;
 	}
 
+	/* ******* Sort females first, but it's not working
 	if (document.URL.indexOf("ip131") >= 0) {
 		// Background selector
 		html = document.getElementsByName("ta")[0];
@@ -576,6 +651,7 @@ setTimeout(function() {
 			childNodes[1].childNodes[1].contentDocument;
 		butt = html.childNodes[0].childNodes[2].childNodes[0].childNodes[3].childNodes[1];
 	}
+	*/
 },
 2000);
 

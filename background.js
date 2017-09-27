@@ -9,7 +9,9 @@ var ip131Id = null;
 var ip203Id = null;
 var hk2loveId = null
 var ip4Id = null;
+var ip69Id = null;
 
+/*
 var querying = browser.tabs.query({url: "http://www.uvoov.com/voovchat/*"});
 querying.then((tabs) => {
 	for (var tab of tabs) {
@@ -34,12 +36,6 @@ querying.then((tabs) => {
 	adultId = tab.id;
 	}});
 
-querying = browser.tabs.query({url: "http://ip131.ek21.com/*"});
-querying.then((tabs) => {
-	for (var tab of tabs) {
-	ip131Id = tab.id;
-	}});
-
 querying = browser.tabs.query({url: "http://ip203.ek21.com/*"});
 querying.then((tabs) => {
 	for (var tab of tabs) {
@@ -51,11 +47,24 @@ querying.then((tabs) => {
 	for (var tab of tabs) {
 	ip4Id = tab.id;
 	}});
+*/
+
+querying = browser.tabs.query({url: "http://ip131.ek21.com/*"});
+querying.then((tabs) => {
+	for (var tab of tabs) {
+	ip131Id = tab.id;
+	}});
 
 querying = browser.tabs.query({url: "http://www.hk2love.com/cgi-bin/*"});
 querying.then((tabs) => {
 	for (var tab of tabs) {
 	hk2loveId = tab.id;
+	}});
+
+querying = browser.tabs.query({url: "http://ip69.ek21.com/*"});
+querying.then((tabs) => {
+	for (var tab of tabs) {
+	ip69Id = tab.id;
 	}});
 
 // Listen to Node.js server
@@ -82,6 +91,7 @@ browser.runtime.onMessage.addListener(
 		// We should send messages to both chatroom's content scripts
 		// Let them decide whether to speak or not
 
+		/*
 		var querying = browser.tabs.query({url: "http://chat.hklovechat.com/frames*"});
 		querying.then((tabs) => {
 			for (var tab of tabs) {
@@ -114,14 +124,6 @@ browser.runtime.onMessage.addListener(
 				}},
 			function() {adultId = null;});
 
-		querying = browser.tabs.query({url: "http://ip131.ek21.com/*"});
-		querying.then((tabs) => {
-			for (var tab of tabs) {
-				ip131Id = tab.id;
-				browser.tabs.sendMessage(ip131Id, {chatroom2: request.chatroom});
-				}},
-			function() {ip131Id = null;});
-
 		querying = browser.tabs.query({url: "http://ip203.ek21.com/*"});
 		querying.then((tabs) => {
 			for (var tab of tabs) {
@@ -137,6 +139,23 @@ browser.runtime.onMessage.addListener(
 				browser.tabs.sendMessage(ip4Id, {chatroom2: request.chatroom});
 				}},
 			function() {ip4Id = null;});
+		*/
+
+		querying = browser.tabs.query({url: "http://ip131.ek21.com/*"});
+		querying.then((tabs) => {
+			for (var tab of tabs) {
+				ip131Id = tab.id;
+				browser.tabs.sendMessage(ip131Id, {chatroom2: request.chatroom});
+				}},
+			function() {ip131Id = null;});
+
+		querying = browser.tabs.query({url: "http://ip69.ek21.com/*"});
+		querying.then((tabs) => {
+			for (var tab of tabs) {
+				ip69Id = tab.id;
+				browser.tabs.sendMessage(ip69Id, {chatroom2: request.chatroom});
+				}},
+			function() {ip69Id = null;});
 
 		querying = browser.tabs.query({url: "http://www.hk2love.com/cgi-bin/*"});
 		querying.then((tabs) => {
@@ -155,18 +174,22 @@ browser.runtime.onMessage.addListener(
 
 		// send message to content script 2
 		// script 2 will decide which page to actually output
+		/*
 		if (adultId)
 			browser.tabs.sendMessage(adultId, {sendtext: request.sendtext});
 		if (voovId)
 			browser.tabs.sendMessage(voovId, {sendtext: request.sendtext});
 		if (voov2Id)
 			browser.tabs.sendMessage(voov2Id, {sendtext: request.sendtext});
-		if (ip131Id)
-			browser.tabs.sendMessage(ip131Id, {sendtext: request.sendtext});
 		if (ip203Id)
 			browser.tabs.sendMessage(ip203Id, {sendtext: request.sendtext});
 		if (ip4Id)
 			browser.tabs.sendMessage(ip4Id, {sendtext: request.sendtext});
+		*/
+		if (ip131Id)
+			browser.tabs.sendMessage(ip131Id, {sendtext: request.sendtext});
+		if (ip69Id)
+			browser.tabs.sendMessage(ip69Id, {sendtext: request.sendtext});
 		if (hk2loveId)
 			browser.tabs.sendMessage(hk2loveId, {sendtext: request.sendtext});
 
@@ -186,6 +209,7 @@ browser.runtime.onMessage.addListener(
 
 	// Request to play an alert sound (must be done thru background page)
 	if (request.alert != null) {
+		/*
 		if (request.alert == "voov") {
 			// console.log("voov alert")
 			var audio = new Audio("voov_alert.ogg");
@@ -195,12 +219,6 @@ browser.runtime.onMessage.addListener(
 		if (request.alert == "voov2") {
 			// console.log("voov alert")
 			var audio = new Audio("voov2_alert.ogg");
-			audio.play();
-		}
-
-		if (request.alert == "ip131") {
-			// console.log("ip131 alert")
-			var audio = new Audio("ip131_alert.ogg");
 			audio.play();
 		}
 
@@ -219,6 +237,19 @@ browser.runtime.onMessage.addListener(
 		if (request.alert == "adult") {
 			// console.log("adult alert")
 			var audio = new Audio("adult_alert.ogg");
+			audio.play();
+		}
+		*/
+
+		if (request.alert == "ip131") {
+			// console.log("ip131 alert")
+			var audio = new Audio("ip131_alert.ogg");
+			audio.play();
+		}
+
+		if (request.alert == "ip69") {
+			// console.log("ip203 alert")
+			var audio = new Audio("ip69_alert.ogg");
 			audio.play();
 		}
 
@@ -264,6 +295,8 @@ function onClickContext2(info, tab) {
     });
 }
 
+
+// *** set ip131 ID
 function onClickContext3(info, tab) {
     browser.tabs.query({
         "active": true,
@@ -275,7 +308,20 @@ function onClickContext3(info, tab) {
     });
 }
 
+// *** set ip69 ID
 function onClickContext4(info, tab) {
+    browser.tabs.query({
+        "active": true,
+        "currentWindow": true
+    }, function (tabs) {
+		ip69Id = tabs[0].id;
+		console.log("Set ip69 ID = " + ip69Id);
+        // browser.tabs.sendMessage(tabs[0].id, { sendtext: "!log " + fname });
+    });
+}
+
+// *** restart event stream
+function onClickContext5(info, tab) {
 
 	evtSource = new EventSource("http://localhost:8080/stream");
 
@@ -312,18 +358,25 @@ for (var i = 0; i < contexts.length; i++) {
 		});
 	// console.log("'" + context + "' item:" + id);
 
-    var title3 = "Set tab ID";
+    var title3 = "Set ip131 ID";
     var id = chrome.contextMenus.create({
         "title": title3,
         "contexts": [context],
         "onclick": onClickContext3
 		});
 		
-    var title4 = "Restart event stream";
+    var title4 = "Set ip69 ID";
     var id = chrome.contextMenus.create({
         "title": title4,
         "contexts": [context],
         "onclick": onClickContext4
+		});
+
+    var title5 = "Restart event stream";
+    var id = chrome.contextMenus.create({
+        "title": title5,
+        "contexts": [context],
+        "onclick": onClickContext5
 		});
 	}
 
