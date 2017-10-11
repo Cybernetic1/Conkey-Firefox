@@ -447,8 +447,8 @@ setInterval( function() {
 					if (stuff == lastHk2loveLine)
 						break;
 					if (// stuff.indexOf("只對『PT141』") > -1 ||
-						stuff.indexOf("只對『dead.Charlotte』") > -1 ||
-						stuff.indexOf(">>『dead.Charlotte』") > -1)
+						stuff.indexOf("只對『死賢』") > -1 ||
+						stuff.indexOf(">>『死賢』") > -1)
 						// stuff.indexOf(">>『PT141』") > -1)
 						{
 						// sound alert
@@ -625,8 +625,8 @@ setTimeout(function() {
 
 	// ****** Fill in password
 	if (document.URL.indexOf("hk2love.com\/index.php?location=chat") >= 0) {
-		document.getElementsByName("id")[0].value = "dead_Charlotte";
-		document.getElementsByName("pw")[0].value = "lowsecurity";
+		document.getElementsByName("id")[0].value = "yanyinyinyin";
+		document.getElementsByName("pw")[0].value = "l0wsecurity";
 		document.getElementsByName("auto_login")[0].checked = true;
 		// button.click();
 	}

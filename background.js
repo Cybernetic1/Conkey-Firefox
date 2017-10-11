@@ -258,11 +258,58 @@ browser.runtime.onMessage.addListener(
 			var audio = new Audio("hk2love_alert.ogg");
 			audio.play();
 		}
-
 	}
 
+	// save log:
+	if (request.saveLog != null) {
+		
+		browser.tabs.query({
+			"active": true,
+			"currentWindow": true
+		}, function (tabs) {
+			browser.tabs.sendMessage(tabs[0].id, { sendtext: "!log " + request.saveLog });
+		});
+
+		var audio = new Audio("ip69_alert.ogg");
+		audio.play();
+	}
+
+	// clear history:
+	if (request.clearHistory != null) {
+		
+		browser.tabs.query({
+			"active": true,
+			"currentWindow": true
+		}, function (tabs) {
+			browser.tabs.sendMessage(tabs[0].id, { sendtext: "!clear" });
+		});
+
+		var audio = new Audio("ip69_alert.ogg");
+		audio.play();
+	}
+
+	// reset event stream:
+	if (request.resetEventStream != null) {
+
+		evtSource = new EventSource("http://localhost:8080/stream");
+
+		evtSource.onmessage = function(e) {
+			// Directly output to chatroom
+			if (hk2loveId)
+				browser.tabs.sendMessage(hk2loveId, {sendtext: e.data});
+			if (ip131Id)
+				browser.tabs.sendMessage(ip131Id, {sendtext: e.data});
+			// console.log("Event: " + e.data);
+		};		
+
+		var audio = new Audio("ip69_alert.ogg");
+		audio.play();
+	}
+
+// End of message-listener
 });
 
+// *** save log
 function onClickContext(info, tab) {
 	// console.log("item " + info.menuItemId + " was clicked");
     // console.log("info: " + JSON.stringify(info));
@@ -279,6 +326,7 @@ function onClickContext(info, tab) {
     });
 }
 
+// *** clear history
 function onClickContext2(info, tab) {
 	console.log("item " + info.menuItemId + " was clicked");
     console.log("info: " + JSON.stringify(info));
@@ -382,7 +430,7 @@ for (var i = 0; i < contexts.length; i++) {
 
 // var console2 = document.getElementById("console-msgs");
 // console2.value = "Background Script .js loaded";
-console.log("Background Script.js (25-March-2017) loaded");
+console.log("Background Script.js (11-Oct-2017) loaded");
 
 // *******************************************************************
 // *******************************************************************
