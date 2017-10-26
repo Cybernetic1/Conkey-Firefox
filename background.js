@@ -209,55 +209,15 @@ browser.runtime.onMessage.addListener(
 
 	// Request to play an alert sound (must be done thru background page)
 	if (request.alert != null) {
-		/*
-		if (request.alert == "voov") {
-			// console.log("voov alert")
-			var audio = new Audio("voov_alert.ogg");
-			audio.play();
-		}
 
-		if (request.alert == "voov2") {
-			// console.log("voov alert")
-			var audio = new Audio("voov2_alert.ogg");
-			audio.play();
-		}
+		var audio = new Audio(request.alert + ".ogg");
+		audio.play();
 
-		if (request.alert == "ip203") {
-			// console.log("ip203 alert")
-			var audio = new Audio("ip203_alert.ogg");
-			audio.play();
-		}
-
-		if (request.alert == "ip4") {
-			// console.log("ip203 alert")
-			var audio = new Audio("ip4_alert.ogg");
-			audio.play();
-		}
-
-		if (request.alert == "adult") {
-			// console.log("adult alert")
-			var audio = new Audio("adult_alert.ogg");
-			audio.play();
-		}
-		*/
-
-		if (request.alert == "ip131") {
-			// console.log("ip131 alert")
-			var audio = new Audio("ip131_alert.ogg");
-			audio.play();
-		}
-
-		if (request.alert == "ip69") {
-			// console.log("ip203 alert")
-			var audio = new Audio("ip69_alert.ogg");
-			audio.play();
-		}
-
-		if (request.alert == "hk2love") {
-			// console.log("hk2love alert")
-			var audio = new Audio("hk2love_alert.ogg");
-			audio.play();
-		}
+		//~ if (request.alert == "hk2love") {
+			//~ // console.log("hk2love alert")
+			//~ var audio = new Audio("hk2love_alert.ogg");
+			//~ audio.play();
+		//~ }
 	}
 
 	// save log:
