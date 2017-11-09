@@ -1,7 +1,7 @@
 // var app = chrome.runtime.getBackgroundPage();
 
 function onClickButt1() {
-	browser.runtime.sendMessage({alert: "ip69"});
+	browser.runtime.sendMessage({alert: "boing"});
 	}
 
 function onClickButt2() {
