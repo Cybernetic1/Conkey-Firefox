@@ -8,10 +8,11 @@
 
 // Which chatroom output is selected by user?
 // The selection is done on the Conceptual Keyboard page with radio buttons
-var voov2Chat = true;		// default
+var voov2Chat = false;
 var voovChat = false;
 var adultChat = false;
-var ip131Chat = false;
+var ip131Chat = true;		// 寻梦园 情色聊天室
+var roomHKChat = false;		// chatroom.HK
 var ip203Chat = false;
 var ip4Chat = false;
 var ip69Chat = false;		// 长直发
@@ -61,25 +62,31 @@ document.addEventListener("mouseover", function(){
 		voov2Chat = true;
 	}
 	*/
+	if (document.URL.indexOf("ip131") >= 0) {		// 寻梦园 情色聊天室
+		// console.log("switch to ip131");
+		browser.runtime.sendMessage({chatroom: "ip131"});
+		ip131Chat = true; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
+		roomHKChat = false; ip69Chat = false;
+	}
+	if (document.URL.indexOf("chatroom.hk") >= 0) {		// chatroom.hk
+		// console.log("switch to ip4");
+		browser.runtime.sendMessage({chatroom: "roomHK"});
+		ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = true;
+		roomHKChat = false; ip69Chat = true;
+	}
+	if (document.URL.indexOf("ip69") >= 0) {		// 寻梦园 长直发
+		// console.log("switch to ip4");
+		browser.runtime.sendMessage({chatroom: "ip4"});
+		ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = true;
+		roomHKChat = false; ip69Chat = true;
+	}
+	/*
 	if (document.URL.indexOf("hk2love") >= 0) {
 		// console.log("switch to hk2love (prude chat)");
 		browser.runtime.sendMessage({chatroom: "hk2love"});
 		ip131Chat = false; ip203Chat = false; hk2loveChat = true; ip4Chat = false;
 		voov2Chat = false; ip69Chat = false;
 	}
-	if (document.URL.indexOf("ip131") >= 0) {		// 寻梦园 情色聊天室
-		// console.log("switch to ip131");
-		browser.runtime.sendMessage({chatroom: "ip131"});
-		ip131Chat = true; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
-		voov2Chat = false; ip69Chat = false;
-	}
-	if (document.URL.indexOf("ip69") >= 0) {		// 寻梦园 长直发
-		// console.log("switch to ip4");
-		browser.runtime.sendMessage({chatroom: "ip4"});
-		ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = true;
-		voov2Chat = false; ip69Chat = true;
-	}
-	/*
 	if (document.URL.indexOf("ip203") >= 0) {
 		// console.log("switch to ip203");
 		browser.runtime.sendMessage({chatroom: "ip203"});
@@ -115,13 +122,13 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			{ voovChat = false; adultChat = true; ip131Chat = false; ip203Chat = false; hk2loveChat = false}
 		*/
 		if (request.chatroom2 == "ip131")
-			{ ip131Chat = true; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
+			{ ip131Chat = true; ip203Chat = false; roomHKChat = false; ip4Chat = false;
 				voov2Chat = false; ip69Chat = false; }
-		else if (request.chatroom2 == "hk2love")
-			{ ip131Chat = false; ip203Chat = false; hk2loveChat = true; ip4Chat = false;
+		else if (request.chatroom2 == "roomHK")
+			{ ip131Chat = false; ip203Chat = false; roomHKChat = true; ip4Chat = false;
 				voov2Chat = false; ip69Chat = false; }
 		else if (request.chatroom2 == "ip69")
-			{ ip131Chat = false; ip203Chat = false; hk2loveChat = false; ip4Chat = false;
+			{ ip131Chat = false; ip203Chat = false; roomHKChat = false; ip4Chat = false;
 				voov2Chat = false; ip69Chat = true; }
 		/*
 		else if (request.chatroom2 == "ip203")
@@ -146,20 +153,20 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	// There are several possible chat rooms:  "Adult", "Voov", "ip131", "ip203", etc
 	if (request.sendtext != null) {
 		str = request.sendtext;
-		console.log("Script2: got message...");
+		// console.log("Script2: got message...");
 		// sendResponse({farewell: "2: got msg..."});
 
 		// check for save-log command:
 		if (str.indexOf("!log") > -1) {
 			// Determine this script instance is for the current active page...
 			// If not, no action should be taken
-			if ((voov2Chat && document.URL.indexOf("hklovechat") >= 0) ||
+			if ((roomHKChat && document.URL.indexOf("chatroom.hk") >= 0) ||
 				(ip131Chat && document.URL.indexOf("ip131") >= 0) ||
 				(ip203Chat && document.URL.indexOf("ip203") >= 0) ||
 				(ip4Chat && document.URL.indexOf("ip4") >= 0) ||
 				(ip69Chat && document.URL.indexOf("ip69") >= 0) ||
 				(hk2loveChat && document.URL.indexOf("hk2love") >= 0)) {
-				
+
 				// the string following by "!log " is the Nickname, hence 5 chars
 				// console.log("log person = " + str.slice(5));
 				// save log array to file
@@ -180,7 +187,13 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			return true;
 		}
 
-		if (str.indexOf("!reset") > -1) {
+		if (str.indexOf("!test") > -1) {
+			console.log("Testing sound...");
+			browser.runtime.sendMessage({alert: "boing"});
+			return true;
+		}
+
+		/* if (str.indexOf("!uninstall") > -1) {
 			// Perhaps unload own script?
 			var uninstalling = browser.management.uninstallSelf({
 				showConfirmDialog: true,
@@ -191,6 +204,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			});
 			return true;
 		}
+		*/
 
 		/*
 		if (voov2Chat && document.URL.indexOf("hklovechat") >= 0) {
@@ -262,7 +276,23 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			chat_history[chat_history.length] = str + "\n";
 			}
 
-		// For HK2Love chatroom (prude chat):
+		// **** for chatroom.HK
+		if (roomHKChat && document.URL.indexOf("chatroom.hk") >= 0) {
+			// var inputBox = document.getElementsByName("c")[0].contentWindow.document.getElementsByName("says_temp")[0];
+			// console.log("DOM element: " + inputBox);
+			var inputBox = document.getElementsByTagName("frame")[2].contentWindow.document.getElementsByName("message")[0];
+			inputBox.value = str;
+			last_str = str;
+			// and then perhaps click "enter"?
+			// var sendButton = document.getElementsByName("c")[0].contentWindow.document.querySelectorAll("input[value='送出']")[0];
+			var sendButton = document.getElementsByTagName("frame")[2].contentWindow.document.getElementsByName("submit")[0];
+			sendButton.click();
+
+			// record own messages
+			chat_history[chat_history.length] = str + "\n";
+			}		
+
+		/* For HK2Love chatroom (prude chat):
 		if (hk2loveChat && document.URL.indexOf("hk2love") >= 0) {
 			if (last_str == str)		// does not allow to send duplicate messages
 				str = " " + str;
@@ -278,6 +308,7 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			// record own messages
 			chat_history[chat_history.length] = str + "\n";
 			}
+		*/ 
 
 		/* This one is the new Dream Chat:
 		if (ip203Chat && document.URL.indexOf("ip203") >= 0) {
@@ -330,6 +361,8 @@ var lastIp131Index = 1;
 var lastIp203Index = 1;
 var lastHk2loveIndex = 1;
 var lastHk2loveLine = "";
+var lastRoomHKIndex = 1;
+var lastRoomHKLine = "";
 var lastIp4Index = 1;
 var lastIp69Index = 1;
 
@@ -427,7 +460,6 @@ setInterval( function() {
 			}
 		}
 	}
-	*/
 
 	// ******** HK 2 Love **************
 	if (document.URL.indexOf("hk2love.com\/cgi-bin") >= 0) {
@@ -447,8 +479,8 @@ setInterval( function() {
 					if (stuff == lastHk2loveLine)
 						break;
 					if (// stuff.indexOf("只對『PT141』") > -1 ||
-						stuff.indexOf("只對『死賢』") > -1 ||
-						stuff.indexOf(">>『死賢』") > -1)
+						stuff.indexOf("只對『dearCharlotte』") > -1 ||
+						stuff.indexOf(">>『dearCharlotte』") > -1)
 						// stuff.indexOf(">>『PT141』") > -1)
 						{
 						// sound alert
@@ -467,6 +499,50 @@ setInterval( function() {
 				stuff = chatWin.children[i].innerText;
 				if (stuff != "") {
 					lastHk2loveLine = stuff;
+					break;
+				}
+			}
+		}
+	}
+	*/
+
+	// ************ chatroom.HK **************
+	if (document.URL.indexOf("chatroom.hk\/chatroom.php") >= 0) {
+		// this gives us an HTML element of the public chat area:
+		html = document.getElementsByName("main_frame")[0].contentWindow.document;
+		// this is the element containing the rows:
+		chatWin = html.getElementsByClassName("messages")[0];
+		if (chatWin !== undefined) {
+			// number of lines in chat win:
+			lastIndex = chatWin.childElementCount - 1;
+			if ((chatWin != null) && (lastIndex > lastRoomHKIndex)) {
+				var alert = false;
+				for (i = lastIndex; i > 0; i--) {
+					stuff = chatWin.children[i].innerText;
+					// console.log("Line: " + stuff);
+					if (stuff == lastRoomHKLine)
+						break;
+					if (// stuff.indexOf("只對『PT141』") > -1 ||
+						stuff.indexOf("向 你 秘密的說 :") > -1 ||
+						stuff.indexOf("向 你 說 :") > -1)
+						// stuff.indexOf(">>『PT141』") > -1)
+						{
+						// sound alert
+						alert = true;
+						chat_history[chat_history.length] = stuff + "\n";
+						// console.log(timeStamp + stuff);
+					}
+				}
+				if (alert == true)
+					browser.runtime.sendMessage({alert: "roomHK"});
+			}
+			lastRoomHKIndex = lastIndex;
+			// Find the last line that's non-empty
+			lastRoomHKLine = "top line";
+			for (i = lastIndex; i > 0; i--) {
+				stuff = chatWin.children[i].innerText;
+				if (stuff != "") {
+					lastRoomHKLine = stuff;
 					break;
 				}
 			}

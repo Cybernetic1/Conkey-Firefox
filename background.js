@@ -10,6 +10,7 @@ var ip203Id = null;
 var hk2loveId = null
 var ip4Id = null;
 var ip69Id = null;
+var roomHKId = null;
 
 /*
 var querying = browser.tabs.query({url: "http://www.uvoov.com/voovchat/*"});
@@ -47,6 +48,12 @@ querying.then((tabs) => {
 	for (var tab of tabs) {
 	ip4Id = tab.id;
 	}});
+
+querying = browser.tabs.query({url: "http://www.hk2love.com/cgi-bin/*"});
+querying.then((tabs) => {
+	for (var tab of tabs) {
+	hk2loveId = tab.id;
+	}});
 */
 
 querying = browser.tabs.query({url: "http://ip131.ek21.com/*"});
@@ -55,10 +62,10 @@ querying.then((tabs) => {
 	ip131Id = tab.id;
 	}});
 
-querying = browser.tabs.query({url: "http://www.hk2love.com/cgi-bin/*"});
+querying = browser.tabs.query({url: "http://chatroom.hk/*"});
 querying.then((tabs) => {
 	for (var tab of tabs) {
-	hk2loveId = tab.id;
+	roomHKId = tab.id;
 	}});
 
 querying = browser.tabs.query({url: "http://ip69.ek21.com/*"});
@@ -72,8 +79,8 @@ var evtSource = new EventSource("http://localhost:8080/stream");
 
 evtSource.onmessage = function(e) {
 	// Directly output to chatroom
-	if (hk2loveId)
-		browser.tabs.sendMessage(hk2loveId, {sendtext: e.data});
+	if (roomHKId)
+		browser.tabs.sendMessage(roomHKId, {sendtext: e.data});
 	if (ip131Id)
 		browser.tabs.sendMessage(ip131Id, {sendtext: e.data});
 	console.log("Event: " + e.data);
@@ -139,6 +146,14 @@ browser.runtime.onMessage.addListener(
 				browser.tabs.sendMessage(ip4Id, {chatroom2: request.chatroom});
 				}},
 			function() {ip4Id = null;});
+
+		querying = browser.tabs.query({url: "http://www.hk2love.com/cgi-bin/*"});
+		querying.then((tabs) => {
+			for (var tab of tabs) {
+				hk2loveId = tab.id;
+				browser.tabs.sendMessage(hk2loveId, {chatroom2: request.chatroom});
+				}},
+			function() {hk2loveId = null;});
 		*/
 
 		querying = browser.tabs.query({url: "http://ip131.ek21.com/*"});
@@ -157,13 +172,13 @@ browser.runtime.onMessage.addListener(
 				}},
 			function() {ip69Id = null;});
 
-		querying = browser.tabs.query({url: "http://www.hk2love.com/cgi-bin/*"});
+		querying = browser.tabs.query({url: "http://chatroom.hk/*"});
 		querying.then((tabs) => {
 			for (var tab of tabs) {
-				hk2loveId = tab.id;
-				browser.tabs.sendMessage(hk2loveId, {chatroom2: request.chatroom});
+				roomHKId = tab.id;
+				browser.tabs.sendMessage(roomHKId, {chatroom2: request.chatroom});
 				}},
-			function() {hk2loveId = null;});
+			function() {roomHKId = null;});
 
 		// console.log("trying to switch to: ", request.chatroom)
 		}
@@ -190,8 +205,8 @@ browser.runtime.onMessage.addListener(
 			browser.tabs.sendMessage(ip131Id, {sendtext: request.sendtext});
 		if (ip69Id)
 			browser.tabs.sendMessage(ip69Id, {sendtext: request.sendtext});
-		if (hk2loveId)
-			browser.tabs.sendMessage(hk2loveId, {sendtext: request.sendtext});
+		if (roomHKId)
+			browser.tabs.sendMessage(roomHKId, {sendtext: request.sendtext});
 
 		// console.log("Sent text to content script 2: ", ip131Id);
 		}
@@ -220,6 +235,7 @@ browser.runtime.onMessage.addListener(
 		//~ }
 	}
 
+	/* ******** following functions seem to be useless *********
 	// save log:
 	if (request.saveLog != null) {
 		
@@ -265,10 +281,12 @@ browser.runtime.onMessage.addListener(
 		var audio = new Audio("ip69_alert.ogg");
 		audio.play();
 	}
+	*/
 
 // End of message-listener
 });
 
+/* ************** these parts also seem unneeded *************
 // *** save log
 function onClickContext(info, tab) {
 	// console.log("item " + info.menuItemId + " was clicked");
@@ -387,6 +405,7 @@ for (var i = 0; i < contexts.length; i++) {
         "onclick": onClickContext5
 		});
 	}
+*/
 
 // var console2 = document.getElementById("console-msgs");
 // console2.value = "Background Script .js loaded";
