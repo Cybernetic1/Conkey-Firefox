@@ -281,16 +281,17 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 			// var inputBox = document.getElementsByName("c")[0].contentWindow.document.getElementsByName("says_temp")[0];
 			// console.log("DOM element: " + inputBox);
 			var inputBox = document.getElementsByTagName("frame")[2].contentWindow.document.getElementsByName("message")[0];
-			inputBox.value = str;
-			last_str = str;
+			var str2 = str.replace("'", "`");
+			inputBox.value = str2;
+			last_str = str2;
 			// and then perhaps click "enter"?
 			// var sendButton = document.getElementsByName("c")[0].contentWindow.document.querySelectorAll("input[value='送出']")[0];
 			var sendButton = document.getElementsByTagName("frame")[2].contentWindow.document.getElementsByName("submit")[0];
 			sendButton.click();
 
 			// record own messages
-			chat_history[chat_history.length] = str + "\n";
-			}		
+			chat_history[chat_history.length] = str2 + "\n";
+			}
 
 		/* For HK2Love chatroom (prude chat):
 		if (hk2loveChat && document.URL.indexOf("hk2love") >= 0) {
@@ -554,7 +555,7 @@ setInterval( function() {
 		// this gives us an HTML element of the public chat area:
 		html = document.getElementById("marow").childNodes[3].childNodes[3].contentDocument.childNodes[0];
 		// this is the <div> element containing the rows:
-		chatWin = html.children[1].children[6];
+		chatWin = html.children[1].children[7];
 		// number of lines in chat win:
 		lastIndex = chatWin.childElementCount - 1;
 		if ((chatWin != null) && (lastIndex > lastIp131Index)) {
@@ -707,12 +708,20 @@ setTimeout(function() {
 		// button.click();
 	}
 	
+	// ****** click 'private chat' and 'auto scroll' automatically
+	if (document.URL.indexOf("chatroom.hk\/chatroom.php") >= 0) {
+		var secretBox = document.getElementsByTagName("frame")[2].contentWindow.document.getElementsByName("secret")[0];
+		secretBox.checked = true;
+		var autoscrollBox = document.getElementsByTagName("frame")[2].contentWindow.document.getElementsByName("autoscroll")[0];
+		autoscrollBox.checked = true;
+	}
 
-	// Click 'private chat' automatically
+	/* Click 'private chat' automatically
 	if (document.URL.indexOf("hk2love.com\/cgi-bin") >= 0) {
 		var doc = document.getElementsByName("c")[0].contentDocument;
 		doc.getElementById("c4").checked = true;
 	}
+	*/
 
 	/* ******* Sort females first, but it's not working
 	if (document.URL.indexOf("ip131") >= 0) {

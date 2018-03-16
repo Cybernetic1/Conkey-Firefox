@@ -235,7 +235,6 @@ browser.runtime.onMessage.addListener(
 		//~ }
 	}
 
-	/* ******** following functions seem to be useless *********
 	// save log:
 	if (request.saveLog != null) {
 		
@@ -246,7 +245,7 @@ browser.runtime.onMessage.addListener(
 			browser.tabs.sendMessage(tabs[0].id, { sendtext: "!log " + request.saveLog });
 		});
 
-		var audio = new Audio("ip69_alert.ogg");
+		var audio = new Audio("ip69.ogg");
 		audio.play();
 	}
 
@@ -260,7 +259,7 @@ browser.runtime.onMessage.addListener(
 			browser.tabs.sendMessage(tabs[0].id, { sendtext: "!clear" });
 		});
 
-		var audio = new Audio("ip69_alert.ogg");
+		var audio = new Audio("ip69.ogg");
 		audio.play();
 	}
 
@@ -278,10 +277,9 @@ browser.runtime.onMessage.addListener(
 			// console.log("Event: " + e.data);
 		};		
 
-		var audio = new Audio("ip69_alert.ogg");
+		var audio = new Audio("ip69.ogg");
 		audio.play();
 	}
-	*/
 
 // End of message-listener
 });
